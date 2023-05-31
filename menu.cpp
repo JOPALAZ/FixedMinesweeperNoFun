@@ -1,9 +1,9 @@
 #include "menu.h"
 
 Menu::Menu() {
-	if (!font.loadFromFile("Font.TTF")) { throw std::exception("FONT WASN'T LOADED"); return; }
-	
-	textureSOAD.loadFromFile("title_pic0.png");
+	if (!font.loadFromFile("Font.TTF")) { isOK = false; return; }
+	if (!textureSlipknot.loadFromFile("title_pic1.png")) {  isOK = false; return; }
+	if (!textureSOAD.loadFromFile("title_pic0.png")) {  isOK = false; return; }
 	textureSOAD.setSmooth(true);
 	SystemOfADown.setTexture(textureSOAD, true);
 	scaleSOADY = (WINDOW_RES.second * allocatedSpaceForArmenians) / textureSOAD.getSize().y;
@@ -13,7 +13,7 @@ Menu::Menu() {
 	SystemOfADown.setPosition(0 - SystemOfADown.getTexture()->getSize().x * scaleSOADX,
 		WINDOW_RES.second - textureSOAD.getSize().y * scaleSOADY / 2.f);
 
-	textureSlipknot.loadFromFile("title_pic1.png");
+	
 	textureSlipknot.setSmooth(true);
 	Slipknot.setTexture(textureSlipknot, true);
 	scaleSlipY = (WINDOW_RES.second * allocatedSpaceForArmenians) / textureSlipknot.getSize().y;
