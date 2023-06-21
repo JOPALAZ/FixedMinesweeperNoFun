@@ -2,6 +2,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include<filesystem>
 #include"GameMap.h"
 #include"constants.h"
 #include "menu.h"
@@ -13,12 +14,12 @@ public:
 	GameField();
 
 	bool isOk() { return isOK; }
-	bool MakeGameField(std::string path,int difficulty);
+	bool MakeGameField(std::filesystem::path path,int difficulty);
 	GameMap* getMapField() { return &gameMap;}
 	sf::Sprite* getHeader() { return &header; }
 	sf::Text* getTextOfBombAmount() { return &bombAmount; };
 	void drawAllElements(sf::RenderWindow* window);
-	std::map< std::string, sf::Texture*>* LoadTextures(std::string path);
+	std::map< std::string, sf::Texture*>* LoadTextures(std::filesystem::path path);
 	void loadSoundTrack();
 	void unloadSoundTrack();
 	void playWinLooseSound(bool win);
@@ -64,7 +65,7 @@ private:
 	std::string bombAmountString;
 	Menu menu;
 	sf::Music WinLoseSound;
-	std::string path;
+	std::filesystem::path path;
 	sf::Texture headerTexture;
 	std::map<std::string, sf::Texture*>* textures=nullptr;
 	sf::Sprite header;

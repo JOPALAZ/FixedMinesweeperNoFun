@@ -11,6 +11,7 @@
 
 int main()
 {
+    
     GameField gameField;
     if(!gameField.isOk()){
         std::cout << "NOT ALL FILES WERE LOADED\n";

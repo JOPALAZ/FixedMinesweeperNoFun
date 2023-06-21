@@ -1,32 +1,34 @@
 #include "menu.h"
+#include<filesystem>
 
 Menu::Menu() {
-	if (!font.loadFromFile("Font.TTF")) { isOK = false; return; }
-	if (!textureSlipknot.loadFromFile("title_pic1.png")) {  isOK = false; return; }
-	if (!textureSOAD.loadFromFile("title_pic0.png")) {  isOK = false; return; }
+	std::filesystem::path menuPath = std::filesystem::current_path();
+	if (!font.loadFromFile((menuPath/"Font.TTF").generic_string())) { isOK = false; return; }
+	if (!textureSlipknot.loadFromFile((menuPath / "title_pic1.png").generic_string())) {  isOK = false; return; }
+	if (!textureSOAD.loadFromFile((menuPath / "title_pic0.png").generic_string())) {  isOK = false; return; }
 	textureSOAD.setSmooth(true);
-	SystemOfADown.setTexture(textureSOAD, true);
+	title_picture0.setTexture(textureSOAD, true);
 	scaleSOADY = (WINDOW_RES.second * allocatedSpaceForArmenians) / textureSOAD.getSize().y;
 	scaleSOADX = scaleSOADY;
-	SystemOfADown.setScale(scaleSOADX, scaleSOADY);
-	SystemOfADown.setOrigin(0, SystemOfADown.getTexture()->getSize().y / 2.f);
-	SystemOfADown.setPosition(0 - SystemOfADown.getTexture()->getSize().x * scaleSOADX,
+	title_picture0.setScale(scaleSOADX, scaleSOADY);
+	title_picture0.setOrigin(0, title_picture0.getTexture()->getSize().y / 2.f);
+	title_picture0.setPosition(0 - title_picture0.getTexture()->getSize().x * scaleSOADX,
 		WINDOW_RES.second - textureSOAD.getSize().y * scaleSOADY / 2.f);
 
 	
 	textureSlipknot.setSmooth(true);
-	Slipknot.setTexture(textureSlipknot, true);
+	title_picture1.setTexture(textureSlipknot, true);
 	scaleSlipY = (WINDOW_RES.second * allocatedSpaceForArmenians) / textureSlipknot.getSize().y;
-	scaleSlipX = SystemOfADown.getTexture()->getSize().x * scaleSOADX / Slipknot.getTexture()->getSize().x;
-	Slipknot.setScale(scaleSlipX, scaleSlipY);
-	Slipknot.setOrigin(0, Slipknot.getTexture()->getSize().y / 2.f);
-	Slipknot.setPosition((float)SystemOfADown.getPosition().x - (float)WINDOW_RES.first,
+	scaleSlipX = title_picture0.getTexture()->getSize().x * scaleSOADX / title_picture1.getTexture()->getSize().x;	
+	title_picture1.setScale(scaleSlipX, scaleSlipY);
+	title_picture1.setOrigin(0, title_picture1.getTexture()->getSize().y / 2.f);
+	title_picture1.setPosition((float)title_picture0.getPosition().x - (float)WINDOW_RES.first,
 		WINDOW_RES.second - textureSlipknot.getSize().y * scaleSlipY / 2.f);
 	title.setString("MINESWEEPER");
 	title.setFont(font);
 	title.setCharacterSize(100);
 	title.setFillColor(sf::Color::White);
-	float scale = std::min(WINDOW_RES.second * allocatedSpaceForArmenians * 0.75f / title.getLocalBounds().height, (-1.f * Slipknot.getPosition().x - 2 * Slipknot.getGlobalBounds().width) / title.getLocalBounds().width);
+	float scale = std::min(WINDOW_RES.second * allocatedSpaceForArmenians * 0.75f / title.getLocalBounds().height, (-1.f * title_picture1.getPosition().x - 2 * title_picture1.getGlobalBounds().width) / title.getLocalBounds().width);
 	title.setScale(scale, scale);
 	title.setOrigin(title.getLocalBounds().left + title.getLocalBounds().width/2.f, title.getLocalBounds().top + title.getLocalBounds().height / 2.f);
 	title.setPosition(float(2*WINDOW_RES.first),
@@ -44,7 +46,7 @@ Menu::Menu() {
 	sf::Text* text;
 	sf::RectangleShape* rect;
 	std::ifstream levelNames;
-	levelNames.open("levelnames.txt");
+	levelNames.open(menuPath / "levelnames.txt");
 	if (levelNames.fail())
 	{
 		std::cout << "FAILED TO OPEN LEVELNAMES FILE\n";
@@ -54,7 +56,6 @@ Menu::Menu() {
 	SmartArray<std::string> Levels;
 	while (std::getline(levelNames, line)&&line.size())
 	{
-		transform(line.begin(), line.end(), line.begin(), toupper);
 		Levels.push_back(line);
 	}
 	
@@ -100,35 +101,35 @@ Menu::Menu() {
 }
 
 void Menu::draw(sf::RenderWindow* win) {
-	win->draw(SystemOfADown);
-	win->draw(Slipknot);
+	win->draw(title_picture0);
+	win->draw(title_picture1);
 	win->draw(title);
 	win->draw(menuText);
-	if (SystemOfADown.getPosition().x<= WINDOW_RES.first&& Slipknot.getPosition().x <= WINDOW_RES.first)
+	if (title_picture0.getPosition().x<= WINDOW_RES.first&& title_picture1.getPosition().x <= WINDOW_RES.first)
 	{
 		
-		SystemOfADown.setPosition(SystemOfADown.getPosition() + sf::Vector2f(animationSpeed, 0));
-		Slipknot.setPosition(Slipknot.getPosition() + sf::Vector2f(animationSpeed, 0));
+		title_picture0.setPosition(title_picture0.getPosition() + sf::Vector2f(animationSpeed, 0));
+		title_picture1.setPosition(title_picture1.getPosition() + sf::Vector2f(animationSpeed, 0));
 		title.setPosition(title.getPosition() + sf::Vector2f(animationSpeed, 0));
 		menuText.setPosition(menuText.getPosition() + sf::Vector2f(animationSpeed, 0));
 	}
-	else if (SystemOfADown.getPosition().x <= WINDOW_RES.first)
+	else if (title_picture0.getPosition().x <= WINDOW_RES.first)
 	{
-		Slipknot.setPosition((float)SystemOfADown.getPosition().x - (float)WINDOW_RES.first,
-			Slipknot.getPosition().y);
+		title_picture1.setPosition((float)title_picture0.getPosition().x - (float)WINDOW_RES.first,
+			title_picture1.getPosition().y);
 		
-		SystemOfADown.setPosition(SystemOfADown.getPosition() + sf::Vector2f(animationSpeed, 0));
+		title_picture0.setPosition(title_picture0.getPosition() + sf::Vector2f(animationSpeed, 0));
 
 		title.setPosition(title.getPosition() + sf::Vector2f(animationSpeed, 0));
 		menuText.setPosition(title.getPosition().x - WINDOW_RES.first,
 			WINDOW_RES.second - textureSlipknot.getSize().y * scaleSlipY / 2.f);
 	}
-	else if (Slipknot.getPosition().x <= WINDOW_RES.first) {
-		SystemOfADown.setPosition((float)Slipknot.getPosition().x - (float)WINDOW_RES.first,
-			SystemOfADown.getPosition().y);
+	else if (title_picture1.getPosition().x <= WINDOW_RES.first) {
+		title_picture0.setPosition((float)title_picture1.getPosition().x - (float)WINDOW_RES.first,
+			title_picture0.getPosition().y);
 		menuText.setPosition(menuText.getPosition() + sf::Vector2f(animationSpeed, 0));
-		Slipknot.setPosition(Slipknot.getPosition() + sf::Vector2f(animationSpeed, 0));
-		title.setPosition((Slipknot.getPosition().x + Slipknot.getGlobalBounds().width + SystemOfADown.getPosition().x) / 2.f,
+		title_picture1.setPosition(title_picture1.getPosition() + sf::Vector2f(animationSpeed, 0));
+		title.setPosition((title_picture1.getPosition().x + title_picture1.getGlobalBounds().width + title_picture0.getPosition().x) / 2.f,
 			WINDOW_RES.second - textureSlipknot.getSize().y * scaleSlipY / 2.f);
 
 	}

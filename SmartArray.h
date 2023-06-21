@@ -71,7 +71,16 @@ private:
 
 		try {
 			DataType* buf = new DataType[capacity];
-			std::memcpy(buf, this->data, sizeof(DataType) * size);
+			if (capacity > size) {
+				for (unsigned i{}; i < this->size; ++i)
+				{
+					buf[i] = data[i];
+				}
+			}
+			else 
+			{
+				throw std::runtime_error("WHEN RESIZING CAPACITY HAS TO BE HIGHER THAN SIZE");
+			}
 			if (this->data) {
 				delete[] data;
 			}
@@ -79,10 +88,12 @@ private:
 			buf = nullptr;
 			this->capacity = capacity;
 		}
-		catch (std::bad_alloc& a) {
+		catch (std::bad_alloc& a) 
+		{
 			std::cout << "ALLOCATION FAILED " << a.what() << '\n';
 		}
-		catch (std::exception& e) {
+		catch (std::exception& e) 
+		{
 			std::cout << "SOMETHING WENT WRONG " << e.what() << '\n';
 		}
 

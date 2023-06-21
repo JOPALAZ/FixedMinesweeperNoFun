@@ -1,9 +1,10 @@
 #include "GameField.h" 
 #include <fstream>
+#include<filesystem>
 GameField::GameField() {
     isOK = menu.isOk();
 }
-std::map< std::string, sf::Texture*>* GameField::LoadTextures(std::string path)
+std::map< std::string, sf::Texture*>* GameField::LoadTextures(std::filesystem::path path)    
 {
     if (textures != nullptr) {
         for (auto& k : *textures) {
@@ -20,32 +21,37 @@ std::map< std::string, sf::Texture*>* GameField::LoadTextures(std::string path)
     std::map<std::string, sf::Texture*>* exhaust = new std::map<std::string, sf::Texture*>;
     for (short i{ -1 }; i < 9; ++i)
     {
-        if (!buf->loadFromFile(path + "N" + std::to_string(i) + ".png")) {
-            std::string exception_text = "DIDN'T FIND " + path + "N" + std::to_string(i) + ".png";
+        if (!buf->loadFromFile(path.append( "N" + std::to_string(i) + ".png").generic_string())) {
+            std::string exception_text = "DIDN'T FIND " + path.generic_string();
             throw std::invalid_argument(exception_text);
         }
+        path = path.parent_path();
         exhaust->insert(std::make_pair("N" + std::to_string(i), buf));
         buf = nullptr;
         buf = new sf::Texture;
     }
-    if (!buf->loadFromFile(path + "UNKNOWN.png")){
-        std::string exception_text = "DIDN'T FIND "+path + "UNKNOWN.png";
+    if (!buf->loadFromFile(path.append("UNKNOWN.png").generic_string())) {
+        std::string exception_text = "DIDN'T FIND " + path.generic_string();
         throw std::invalid_argument(exception_text);
+    
     }
+    path = path.parent_path();
     exhaust->insert(std::make_pair("UNKNOWN", buf));
     buf = nullptr;
     buf = new sf::Texture;
-    if (!buf->loadFromFile(path + "QUESTION.png")) {
-        std::string exception_text = "DIDN'T FIND " + path + "QUESTION.png";
+    if (!buf->loadFromFile(path.append("QUESTION.png").generic_string())) {
+        std::string exception_text = "DIDN'T FIND " + path.generic_string();
         throw std::invalid_argument(exception_text);
     }
+    path = path.parent_path();
     exhaust->insert(std::make_pair("QUESTION", buf));
     buf = nullptr;
     buf = new sf::Texture;
-    if (!buf->loadFromFile(path + "QUESTIONUS.png")) {
-        std::string exception_text = "DIDN'T FIND " + path + "QUESTIONUS.png";
+    if (!buf->loadFromFile(path.append("QUESTIONUS.png").generic_string())) {
+        std::string exception_text = "DIDN'T FIND " + path.generic_string();
         throw std::invalid_argument(exception_text);
     }
+    path = path.parent_path();
     exhaust->insert(std::make_pair("QUESTIONUS", buf));
     buf = nullptr;
     return exhaust;
@@ -61,9 +67,11 @@ void GameField::loadSoundTrack()
 {
     unloadSoundTrack();
     
-    if (!SoundTrack.openFromFile(path + "\\soundtrack")) {
+    std::filesystem::path soundpath = path;
+    soundpath.append("soundtrack");
+    if (!SoundTrack.openFromFile(soundpath.generic_string())) {
 
-        throw std::runtime_error("THERE IS NO " + path + "\\soundtrack");
+        throw std::runtime_error("THERE IS NO " + soundpath.generic_string());
     }
     SoundTrack.setLoop(true);
     SoundTrack.setVolume(50.f);
@@ -81,14 +89,15 @@ void GameField::unloadSoundTrack()
     if (WinLoseSound.getStatus()==sf::Sound::Playing)
         WinLoseSound.stop();
 }
-bool GameField::MakeGameField(std::string path, int difficulty) {
-    if (!headerTexture.loadFromFile(path + "header.png")) 
+bool GameField::MakeGameField(std::filesystem::path path, int difficulty) {
+    
+    if (!headerTexture.loadFromFile(path.append("header.png").generic_string()))
     {
         isOK = false; std::cout << "Not all textures were loaded \n"; return false;
     }
     try
     {
-        textures = LoadTextures(path);
+        textures = LoadTextures(path.parent_path());
     }
     catch (const std::exception&)
     {
@@ -113,7 +122,7 @@ bool GameField::MakeGameField(std::string path, int difficulty) {
     gameMap.deleteUnique();
     gameMap.create(MapSize(difficulty * minefieldScaleY), MapSize(difficulty * minefieldScaleX),
         textures, std::make_pair(unsigned short(WINDOW_RES.second * MARGIN_SCALE), 0));
-    if (!Font.loadFromFile("Font.TTF")) { std::cout << "FONT WASN'T LOADED\n"; isOK = false; return false; }
+    if (!Font.loadFromFile((std::filesystem::current_path() / "Font.TTF").generic_string())) { std::cout << "FONT WASN'T LOADED\n"; isOK = false; return false; }
     bombAmount.setFont(Font);
     screenSpaceAllocatedForText = unsigned(WINDOW_RES.first - headerTexture.getSize().x * scaleX);
     bombAmountString = "BOMBS LEFT: " + std::to_string(gameMap.getBombAmount());
@@ -197,10 +206,11 @@ bool GameField::leftClickOnField(sf::RenderWindow* window)
     }
     else
     {
-        this->path = menu.leftClick(window);
-        if (this->path.size() != 0) {
-            if (!MakeGameField(this->path + "\\", getDifficulty()))
-                throw std::invalid_argument("NOT ALL FILES WERE LOADED");
+        std::string levelname = menu.leftClick(window);
+        this->path = std::filesystem::current_path().append(levelname);
+        if (levelname.size() != 0) {
+            if (!MakeGameField(this->path, getDifficulty()))
+                throw std::runtime_error("NOT ALL FILES WERE LOADED");
         }
 
 
@@ -233,7 +243,8 @@ bool GameField::isWin(sf::RenderWindow* window)
 
 unsigned GameField::getDifficulty()
 {
-    std::ifstream file(path + "\\dif");
+    std::filesystem::path difficultyPath = path;
+    std::ifstream file(difficultyPath.append("dif").generic_string());
     unsigned difficulty;
     if (file.is_open()) {
         file >> difficulty;
@@ -244,8 +255,8 @@ unsigned GameField::getDifficulty()
 void GameField::playWinLooseSound(bool win) {
     unloadSoundTrack();
     sf::sleep(sf::milliseconds(250));
-        if (win) { WinLoseSound.openFromFile("win.flac"); }
-        else { WinLoseSound.openFromFile("lose.flac"); }
+        if (win) { WinLoseSound.openFromFile((std::filesystem::current_path()/"win.flac").generic_string()); }
+        else { WinLoseSound.openFromFile((std::filesystem::current_path() / "lose.flac").generic_string()); }
         WinLoseSound.setVolume([&]()->float {if (muted) return 0.f; if (volume != 0.f) return volume; else return 50.f; }());
         WinLoseSound.setLoop(false);
         WinLoseSound.play();

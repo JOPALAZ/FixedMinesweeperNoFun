@@ -19,13 +19,13 @@ private:
 	float scaleSlipX=1;
 	float allocatedSpaceForArmenians = 0.25f;
 	sf::Texture textureSOAD;
-	sf::Sprite SystemOfADown;
+	sf::Sprite title_picture0;
 	sf::Font font;
 	sf::Text title;
 	sf::Text menuText;
 	unsigned titleSize = 1;
 	sf::Texture textureSlipknot;
-	sf::Sprite Slipknot;
+	sf::Sprite title_picture1;
 	std::map<sf::Text*, sf::RectangleShape*> Buttons;
 };
 
