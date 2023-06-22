@@ -238,8 +238,8 @@ bool GameMap::leftClickOnMap(int x, int y) {
 
 	if (x > deltaX && x  < CellSizeX * MatrixMapSizeX + deltaX && y> deltaY && y < CellSizeY * MatrixMapSizeY + deltaY)
 	{
-		unsigned short y_ = unsigned short((y - deltaY) / CellSizeY);
-		unsigned short x_ = unsigned short((x - deltaX) / CellSizeX);
+		unsigned short y_ = (unsigned short)((y - deltaY) / CellSizeY);
+		unsigned short x_ = (unsigned short)((x - deltaX) / CellSizeX);
 		if (!isMapPrepaired) {
 			prepareMap(y_, x_);
 		}
@@ -259,14 +259,14 @@ void GameMap::rightClickOnMap(int x, int y)
 {
 	if (x > deltaX && x  < CellSizeX * MatrixMapSizeX + deltaX && y> deltaY && y < CellSizeY * MatrixMapSizeY + deltaY && bombAmount>0)
 	{
-		unsigned short y_ = unsigned short((y - deltaY) / CellSizeY);
-		unsigned short x_ = unsigned short((x - deltaX) / CellSizeX);
+		unsigned short y_ = (unsigned short)((y - deltaY) / CellSizeY);
+		unsigned short x_ = (unsigned short)((x - deltaX) / CellSizeX);
 		bombAmount-=map[y_][x_].flag();
 	}
 	else if(x > deltaX && x  < CellSizeX * MatrixMapSizeX + deltaX && y> deltaY && y < CellSizeY * MatrixMapSizeY + deltaY)
 	{
-		unsigned short y_ = unsigned short((y - deltaY) / CellSizeY);
-		unsigned short x_ = unsigned short((x - deltaX) / CellSizeX);
+		unsigned short y_ = (unsigned short)((y - deltaY) / CellSizeY);
+		unsigned short x_ = (unsigned short)((x - deltaX) / CellSizeX);
 		if (map[y_][x_].isFlagged())
 			bombAmount -= map[y_][x_].flag();
 	}

@@ -121,7 +121,7 @@ bool GameField::MakeGameField(std::filesystem::path path, int difficulty) {
     }
     gameMap.deleteUnique();
     gameMap.create(MapSize(difficulty * minefieldScaleY), MapSize(difficulty * minefieldScaleX),
-        textures, std::make_pair(unsigned short(WINDOW_RES.second * MARGIN_SCALE), 0));
+        textures, std::make_pair((unsigned short)(WINDOW_RES.second * MARGIN_SCALE), 0));
     if (!Font.loadFromFile((std::filesystem::current_path() / "Font.TTF").generic_string())) { std::cout << "FONT WASN'T LOADED\n"; isOK = false; return false; }
     bombAmount.setFont(Font);
     screenSpaceAllocatedForText = unsigned(WINDOW_RES.first - headerTexture.getSize().x * scaleX);
