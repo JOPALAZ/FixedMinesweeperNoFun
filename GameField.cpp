@@ -189,7 +189,7 @@ bool GameField::leftClickOnField(sf::RenderWindow* window)
             bombAmount.setOrigin(bombAmount.getLocalBounds().left + bombAmount.getLocalBounds().width / 2.0f,
                 bombAmount.getLocalBounds().top + bombAmount.getLocalBounds().height / 2.0f);
             bombAmount.setPosition(WINDOW_RES.first * 0.8f, WINDOW_RES.second * MARGIN_SCALE / 2.f);
-            bombAmount.setFillColor(sf::Color(255, 64, 48)); // KORICHNEVY 
+            bombAmount.setFillColor(sf::Color(255, 64, 48)); // Brown color 
             gameMap.openAllMap();
             window->clear();
             drawAllElements(window);

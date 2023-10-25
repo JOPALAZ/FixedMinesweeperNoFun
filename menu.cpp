@@ -1,6 +1,19 @@
 #include "menu.h"
 #include<filesystem>
-
+std::string clean(const std::string& str) 
+{
+	std::string result;
+	bool started = false;
+    for (const auto& c : str)
+    {
+        if (std::isalnum(c) || (c ==' ' && started))
+        {
+            result += c;
+			started = true;
+        }
+    }
+    return result;
+}
 Menu::Menu() {
 	std::filesystem::path menuPath = std::filesystem::current_path();
 	if (!font.loadFromFile((menuPath/"Font.TTF").generic_string())) { isOK = false; return; }
@@ -54,9 +67,9 @@ Menu::Menu() {
 	}
 	std::string line;
 	SmartArray<std::string> Levels;
-	while (std::getline(levelNames, line)&&line.size())
+	while (std::getline(levelNames, line)&&clean(line).size())
 	{
-		Levels.push_back(line);
+		Levels.push_back(clean(line));
 	}
 	
 	levelNames.close();

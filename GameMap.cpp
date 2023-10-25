@@ -137,8 +137,8 @@ void GameMap::openCellsNear(MapPosition y, MapPosition x) {
 	bombAmount -= map[y][x].unflag();
 	map[y][x].step();
 	if (map[y][x].getNum() == 0) {
-		for (short i{ y - 1 }; i <= y + 1; ++i) {
-			for (short j{ x - 1 }; j <= x + 1; ++j) {
+		for (short i{ short(y - 1) }; i <= y + 1; ++i) {
+			for (short j{ short(x - 1) }; j <= x + 1; ++j) {
 				if (j>= 0 && j < MatrixMapSizeX && i >= 0 && i < MatrixMapSizeY && map[i][j].getNum() != -1 && map[i][j].isntOpened())
 			{
 					openCellsNear(i, j);
