@@ -1,484 +1,430 @@
 ﻿#include "GameMap.h"
 GameMap::GameMap() {
-	CellSizeX = 0;
-	CellSizeY = 0;
-	MatrixMapSizeX = 0;
-	MatrixMapSizeY = 0;
-	bombAmount = 0;
-	bombAmount_ = 0;
-	deltaX = 0;
-	deltaY = 0;
-	map = nullptr;
+  CellSizeX = 0;
+  CellSizeY = 0;
+  MatrixMapSizeX = 0;
+  MatrixMapSizeY = 0;
+  bombAmount = 0;
+  bombAmount_ = 0;
+  deltaX = 0;
+  deltaY = 0;
+  map = nullptr;
 };
-void GameMap::create(MapSize y, MapSize x, std::map<std::string, sf::Texture*>* textures, std::pair<unsigned short, unsigned short>p1) {
-	MatrixMapSizeY = y;
-	MatrixMapSizeX = x;
-	bombAmount_ = x*y/(std::min(WINDOW_RES.first,WINDOW_RES.second)/69);
-	bombAmount = bombAmount_;
-	srand((unsigned)time(0));
-	map = new MapPoint * [y];
-	float size = std::min((std::max(p1.first, (unsigned short)WINDOW_RES.second) - std::min(p1.first, (unsigned short)WINDOW_RES.second)) / (float)y, (std::max(p1.second, (unsigned short)WINDOW_RES.first) - std::min(p1.second, (unsigned short)WINDOW_RES.first)) / (float)x);
-	CellSizeX = size;
-	CellSizeY = size;
-	deltaY = p1.first;
-	deltaX = p1.second;
-	for (MapSize i{}; i < y; ++i) {
-		map[i] = new MapPoint[x];
-		for (MapSize j{}; j < x; ++j) {
-			map[i][j].setCellSizes(size, size);
-			map[i][j].setTextures(textures);
-			map[i][j].setSize(size, size);
-			map[i][j].setPosition(float(j * size + p1.second), float(i * size + p1.first));
-		}
-	}
-	sureFlags.clear();
-	
+void GameMap::create(MapSize y, MapSize x,
+                     std::map<std::string, sf::Texture *> *textures,
+                     std::pair<unsigned short, unsigned short> p1) {
+  MatrixMapSizeY = y;
+  MatrixMapSizeX = x;
+  bombAmount_ = x * y / (std::min(WINDOW_RES.first, WINDOW_RES.second) / 69);
+  bombAmount = bombAmount_;
+  srand((unsigned)time(0));
+  map = new MapPoint *[y];
+  float size =
+      std::min((std::max(p1.first, (unsigned short)WINDOW_RES.second) -
+                std::min(p1.first, (unsigned short)WINDOW_RES.second)) /
+                   (float)y,
+               (std::max(p1.second, (unsigned short)WINDOW_RES.first) -
+                std::min(p1.second, (unsigned short)WINDOW_RES.first)) /
+                   (float)x);
+  CellSizeX = size;
+  CellSizeY = size;
+  deltaY = p1.first;
+  deltaX = p1.second;
+  for (MapSize i{}; i < y; ++i) {
+    map[i] = new MapPoint[x];
+    for (MapSize j{}; j < x; ++j) {
+      map[i][j].setCellSizes(size, size);
+      map[i][j].setTextures(textures);
+      map[i][j].setSize(size, size);
+      map[i][j].setPosition(float(j * size + p1.second),
+                            float(i * size + p1.first));
+    }
+  }
+  sureFlags.clear();
 }
-void GameMap::drawMap(sf::RenderWindow* window) {
-	for (MapSize i{}; i < MatrixMapSizeY; ++i) {
-		for (MapSize j{}; j < MatrixMapSizeX; ++j) {
-			window->draw(map[i][j].getSprite());
-		}
-	}
+void GameMap::drawMap(sf::RenderWindow *window) {
+  for (MapSize i{}; i < MatrixMapSizeY; ++i) {
+    for (MapSize j{}; j < MatrixMapSizeX; ++j) {
+      window->draw(map[i][j].getSprite());
+    }
+  }
 }
-void GameMap::prepareMap(MapPosition y_pos, MapPosition x_pos)
-{
-	auto isBounded = [&](MapSize i, MapSize j)->bool
-	{
-		for (short k = i - 1; k < i + 2; ++k)
-		{
-			for (short p = j - 1; p < j + 2; ++p)
-			{
-				if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0))
-				{
-					if (k == y_pos && p == x_pos) {
-						return true;
-					}
-				}
-			}
-		}
+void GameMap::prepareMap(MapPosition y_pos, MapPosition x_pos) {
+  auto isBounded = [&](MapSize i, MapSize j) -> bool {
+    for (short k = i - 1; k < i + 2; ++k) {
+      for (short p = j - 1; p < j + 2; ++p) {
+        if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0)) {
+          if (k == y_pos && p == x_pos) {
+            return true;
+          }
+        }
+      }
+    }
 
-		return false;
-	};
-	unsigned short bombPlanted = 0;
-	while (bombAmount_ > bombPlanted) {
-		for (MapSize i{}; i < MatrixMapSizeY; ++i) {
-			if (bombPlanted >= bombAmount_)
-				break;
-			for (MapSize j{}; j < MatrixMapSizeX; ++j) {
-				if (bombPlanted < bombAmount_) {
-					if (i != y_pos && j != x_pos && map[i][j].getNum() != -1&&!isBounded(i,j)) {
-						if (rand() % MatrixMapSizeX * MatrixMapSizeY <= 1) {
+    return false;
+  };
+  unsigned short bombPlanted = 0;
+  while (bombAmount_ > bombPlanted) {
+    for (MapSize i{}; i < MatrixMapSizeY; ++i) {
+      if (bombPlanted >= bombAmount_)
+        break;
+      for (MapSize j{}; j < MatrixMapSizeX; ++j) {
+        if (bombPlanted < bombAmount_) {
+          if (i != y_pos && j != x_pos && map[i][j].getNum() != -1 &&
+              !isBounded(i, j)) {
+            if (rand() % MatrixMapSizeX * MatrixMapSizeY <= 1) {
 
-							map[i][j].setNum(-1);
-							bombPlanted++;
-						}
-					}
-				}
-				else
-					break;
+              map[i][j].setNum(-1);
+              bombPlanted++;
+            }
+          }
+        } else
+          break;
+      }
+    }
+  }
+  for (MapSize i{}; i < MatrixMapSizeY; ++i) {
+    for (MapSize j{}; j < MatrixMapSizeX; ++j) {
 
-			}
-		}
-	}
-	for (MapSize i{}; i < MatrixMapSizeY; ++i)
-	{
-		for (MapSize j{}; j < MatrixMapSizeX; ++j)
-		{
-
-			if (map[i][j].getNum() == -1)
-			{
-				for (short k = i - 1; k < i + 2; ++k)
-				{
-					for (short p = j - 1; p < j + 2; ++p)
-					{
-						if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0))
-						{
-							if (map[k][p].getNum() != -1)
-							{
-								map[k][p].setNum(map[k][p].getNum() + 1);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	isMapPrepaired = true;
+      if (map[i][j].getNum() == -1) {
+        for (short k = i - 1; k < i + 2; ++k) {
+          for (short p = j - 1; p < j + 2; ++p) {
+            if ((p < MatrixMapSizeX && p >= 0) &&
+                (k < MatrixMapSizeY && k >= 0)) {
+              if (map[k][p].getNum() != -1) {
+                map[k][p].setNum(map[k][p].getNum() + 1);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  isMapPrepaired = true;
 }
 bool GameMap::isAllFlagCorrect() {
-	if (bombAmount == 0) {
-		for (MapSize i{}; i < MatrixMapSizeY; ++i) {
-			for (MapSize j{}; j < MatrixMapSizeX; ++j) {
-				if (map[i][j].isFlagged() && map[i][j].getNum() != -1) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	return false;
+  if (bombAmount == 0) {
+    for (MapSize i{}; i < MatrixMapSizeY; ++i) {
+      for (MapSize j{}; j < MatrixMapSizeX; ++j) {
+        if (map[i][j].isFlagged() && map[i][j].getNum() != -1) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  return false;
 }
-bool GameMap::checkWinState()
-{
-	if (isAllFlagCorrect()) {
-		return true;
-	}
-	for (MapSize i{}; i < MatrixMapSizeY; ++i) {
-		for (MapSize j{}; j < MatrixMapSizeX; ++j) {
-			if (map[i][j].isntOpened() && map[i][j].getNum() != -1) {
-				return false;
-			}
-		}
-	}
-	return true;
+bool GameMap::checkWinState() {
+  if (isAllFlagCorrect()) {
+    return true;
+  }
+  for (MapSize i{}; i < MatrixMapSizeY; ++i) {
+    for (MapSize j{}; j < MatrixMapSizeX; ++j) {
+      if (map[i][j].isntOpened() && map[i][j].getNum() != -1) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 void GameMap::openCellsNear(MapPosition y, MapPosition x) {
-	bombAmount -= map[y][x].unflag();
-	map[y][x].step();
-	if (map[y][x].getNum() == 0) {
-		for (short i{ short(y - 1) }; i <= y + 1; ++i) {
-			for (short j{ short(x - 1) }; j <= x + 1; ++j) {
-				if (j>= 0 && j < MatrixMapSizeX && i >= 0 && i < MatrixMapSizeY && map[i][j].getNum() != -1 && map[i][j].isntOpened())
-			{
-					openCellsNear(i, j);
-			}
-			}
-		}
-	}
+  bombAmount -= map[y][x].unflag();
+  map[y][x].step();
+  if (map[y][x].getNum() == 0) {
+    for (short i{short(y - 1)}; i <= y + 1; ++i) {
+      for (short j{short(x - 1)}; j <= x + 1; ++j) {
+        if (j >= 0 && j < MatrixMapSizeX && i >= 0 && i < MatrixMapSizeY &&
+            map[i][j].getNum() != -1 && map[i][j].isntOpened()) {
+          openCellsNear(i, j);
+        }
+      }
+    }
+  }
 }
-SmartArray<std::pair<MapSize, MapSize>> GameMap::isNearOpened(std::pair<MapSize, MapSize>& coordinates)
-{
-	SmartArray<std::pair<MapSize, MapSize>> exhaust;
-	for (short k = coordinates.first - 1; k < coordinates.first + 2; ++k)
-	{
-		for (short p = coordinates.second - 1; p < coordinates.second + 2; ++p)
-		{
-			if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0))
-			{
-				if (!map[k][p].isntOpened()) 
-				{
-					exhaust.push_back(std::make_pair(k, p));
-
-				}
-			}
-		}
-	}
-	return exhaust;
-
+SmartArray<std::pair<MapSize, MapSize>>
+GameMap::isNearOpened(std::pair<MapSize, MapSize> &coordinates) {
+  SmartArray<std::pair<MapSize, MapSize>> exhaust;
+  for (short k = coordinates.first - 1; k < coordinates.first + 2; ++k) {
+    for (short p = coordinates.second - 1; p < coordinates.second + 2; ++p) {
+      if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0)) {
+        if (!map[k][p].isntOpened()) {
+          exhaust.push_back(std::make_pair(k, p));
+        }
+      }
+    }
+  }
+  return exhaust;
 }
-bool GameMap::isAtLeastOneCellCorrect(SmartArray<std::pair<MapSize, MapSize>>& toCheck)
-{
-	for (unsigned i{}; i < toCheck.getSize(); ++i) {
-		if (calculateCountOfUnknownCellsNear(toCheck[i]).first
-			== map[toCheck[i].first][toCheck[i].second].getNum())
-		{
-			return true;
-		}
-	}
-	return false;
+bool GameMap::isAtLeastOneCellCorrect(
+    SmartArray<std::pair<MapSize, MapSize>> &toCheck) {
+  for (unsigned i{}; i < toCheck.getSize(); ++i) {
+    if (calculateCountOfUnknownCellsNear(toCheck[i]).first ==
+        map[toCheck[i].first][toCheck[i].second].getNum()) {
+      return true;
+    }
+  }
+  return false;
 }
-void GameMap::checkAllFlags()
-{
-	SmartArray<std::pair<MapSize, MapSize>> flags;
-	for (MapSize i{}; i < MatrixMapSizeY; ++i) // Ya izvinyayus' za etu chast' koda,
-		//ya ne pridumal kak napisat' eto krasivo.
-	{
-		for (MapSize j{}; j < MatrixMapSizeX; ++j)
-		{
-			std::pair<MapSize, MapSize> pos = std::make_pair(i, j);
-			if (map[i][j].isFlagged()&&sureFlags.find(pos) == -1)
-				flags.push_back(std::make_pair(i, j));
-		}
-	}
-	for (unsigned i{}; i < flags.getSize(); ++i) 
-	{
-		SmartArray<std::pair<MapSize, MapSize>> openedNear = isNearOpened(flags[i]);
-		if (openedNear.getSize() == 0)
-			bombAmount -= map[flags[i].first][flags[i].second].unflag();
-		else
-			if (!isAtLeastOneCellCorrect(openedNear)) 
-			{
-				bombAmount -= map[flags[i].first][flags[i].second].unflag();
-			}
-
-	}
-	
+void GameMap::checkAllFlags() {
+  SmartArray<std::pair<MapSize, MapSize>> flags;
+  for (MapSize i{}; i < MatrixMapSizeY;
+       ++i) // Ya izvinyayus' za etu chast' koda,
+            // ya ne pridumal kak napisat' eto krasivo.
+  {
+    for (MapSize j{}; j < MatrixMapSizeX; ++j) {
+      std::pair<MapSize, MapSize> pos = std::make_pair(i, j);
+      if (map[i][j].isFlagged() && sureFlags.find(pos) == -1)
+        flags.push_back(std::make_pair(i, j));
+    }
+  }
+  for (unsigned i{}; i < flags.getSize(); ++i) {
+    SmartArray<std::pair<MapSize, MapSize>> openedNear = isNearOpened(flags[i]);
+    if (openedNear.getSize() == 0)
+      bombAmount -= map[flags[i].first][flags[i].second].unflag();
+    else if (!isAtLeastOneCellCorrect(openedNear)) {
+      bombAmount -= map[flags[i].first][flags[i].second].unflag();
+    }
+  }
 }
 bool GameMap::openCell(MapPosition y, MapPosition x) {
-	if (!map[y][x].step())
-	{
-		return false;
-	}
-	else {
-		
-		openCellsNear(y, x);
-	}
-	return true;
+  if (!map[y][x].step()) {
+    return false;
+  } else {
+
+    openCellsNear(y, x);
+  }
+  return true;
 }
 void GameMap::debugPrint() {
-	for (MapSize i{}; i < MatrixMapSizeY; ++i) {
-		for (MapSize j{}; j < MatrixMapSizeX; ++j) {
-			if (map[i][j].getNum() >= 0) { std::cout << " "; };
-			std::cout << map[i][j].getNum();
-			std::cout << " ";
-		}
-		std::cout << std::endl;
-	}
+  for (MapSize i{}; i < MatrixMapSizeY; ++i) {
+    for (MapSize j{}; j < MatrixMapSizeX; ++j) {
+      if (map[i][j].getNum() >= 0) {
+        std::cout << " ";
+      };
+      std::cout << map[i][j].getNum();
+      std::cout << " ";
+    }
+    std::cout << std::endl;
+  }
 }
 void GameMap::debugPrintBool() {
-	for (MapSize i{}; i < MatrixMapSizeY; ++i) {
-		for (MapSize j{}; j < MatrixMapSizeX; ++j) {
-			std::cout << map[i][j].isntOpened() << "  ";
-		}
-		std::cout << std::endl<<'\n';
-	}
+  for (MapSize i{}; i < MatrixMapSizeY; ++i) {
+    for (MapSize j{}; j < MatrixMapSizeX; ++j) {
+      std::cout << map[i][j].isntOpened() << "  ";
+    }
+    std::cout << std::endl << '\n';
+  }
 }
 bool GameMap::leftClickOnMap(int x, int y) {
 
-	if (x > deltaX && x  < CellSizeX * MatrixMapSizeX + deltaX && y> deltaY && y < CellSizeY * MatrixMapSizeY + deltaY)
-	{
-		unsigned short y_ = (unsigned short)((y - deltaY) / CellSizeY);
-		unsigned short x_ = (unsigned short)((x - deltaX) / CellSizeX);
-		if (!isMapPrepaired) {
-			prepareMap(y_, x_);
-		}
-		if (map[y_][x_].step())
-		{
-			openCell(y_, x_);
-			bombAmount -= map[y_][x_].unflag();
-			return true;
-		}
-		else
-			return false;
-
-	}
-	return true;
+  if (x > deltaX && x < CellSizeX * MatrixMapSizeX + deltaX && y > deltaY &&
+      y < CellSizeY * MatrixMapSizeY + deltaY) {
+    unsigned short y_ = (unsigned short)((y - deltaY) / CellSizeY);
+    unsigned short x_ = (unsigned short)((x - deltaX) / CellSizeX);
+    if (!isMapPrepaired) {
+      prepareMap(y_, x_);
+    }
+    if (map[y_][x_].step()) {
+      openCell(y_, x_);
+      bombAmount -= map[y_][x_].unflag();
+      return true;
+    } else
+      return false;
+  }
+  return true;
 }
-void GameMap::rightClickOnMap(int x, int y)
-{
-	if (x > deltaX && x  < CellSizeX * MatrixMapSizeX + deltaX && y> deltaY && y < CellSizeY * MatrixMapSizeY + deltaY && bombAmount>0)
-	{
-		unsigned short y_ = (unsigned short)((y - deltaY) / CellSizeY);
-		unsigned short x_ = (unsigned short)((x - deltaX) / CellSizeX);
-		bombAmount-=map[y_][x_].flag();
-	}
-	else if(x > deltaX && x  < CellSizeX * MatrixMapSizeX + deltaX && y> deltaY && y < CellSizeY * MatrixMapSizeY + deltaY)
-	{
-		unsigned short y_ = (unsigned short)((y - deltaY) / CellSizeY);
-		unsigned short x_ = (unsigned short)((x - deltaX) / CellSizeX);
-		if (map[y_][x_].isFlagged())
-			bombAmount -= map[y_][x_].flag();
-	}
+void GameMap::rightClickOnMap(int x, int y) {
+  if (x > deltaX && x < CellSizeX * MatrixMapSizeX + deltaX && y > deltaY &&
+      y < CellSizeY * MatrixMapSizeY + deltaY && bombAmount > 0) {
+    unsigned short y_ = (unsigned short)((y - deltaY) / CellSizeY);
+    unsigned short x_ = (unsigned short)((x - deltaX) / CellSizeX);
+    bombAmount -= map[y_][x_].flag();
+  } else if (x > deltaX && x < CellSizeX * MatrixMapSizeX + deltaX &&
+             y > deltaY && y < CellSizeY * MatrixMapSizeY + deltaY) {
+    unsigned short y_ = (unsigned short)((y - deltaY) / CellSizeY);
+    unsigned short x_ = (unsigned short)((x - deltaX) / CellSizeX);
+    if (map[y_][x_].isFlagged())
+      bombAmount -= map[y_][x_].flag();
+  }
 }
 void GameMap::openAllMap() {
-	for (unsigned short i{}; i < MatrixMapSizeY; ++i)
-	{
-		for(unsigned short j{}; j < MatrixMapSizeX; ++j)
-		{
-			if (!map[i][j].isFlagged())
-				map[i][j].step();
-			else if (map[i][j].getNum() != -1)
-				map[i][j].step();
-		}
-	}
+  for (unsigned short i{}; i < MatrixMapSizeY; ++i) {
+    for (unsigned short j{}; j < MatrixMapSizeX; ++j) {
+      if (!map[i][j].isFlagged())
+        map[i][j].step();
+      else if (map[i][j].getNum() != -1)
+        map[i][j].step();
+    }
+  }
 }
 void GameMap::deleteUnique() {
-	isMapPrepaired = false;
-	if (map!=nullptr) {
-		
-		for (short i{}; i < MatrixMapSizeY && map[i]; ++i)
-		{
-			delete[] map[i];
-		}
+  isMapPrepaired = false;
+  if (map != nullptr) {
 
-		delete[] map;
-		map = nullptr;
+    for (short i{}; i < MatrixMapSizeY && map[i]; ++i) {
+      delete[] map[i];
+    }
 
-	}
+    delete[] map;
+    map = nullptr;
+  }
 }
 
-bool GameMap::isBordering(MapSize& y, MapSize& x)
-{
-	if (map[y][x].isntOpened())
-		return false;
-	bool known = false;
-	bool unknown = false;
-	for (short k = y - 1; k < y + 2; ++k)
-	{
-		for (short p = x - 1; p < x + 2; ++p)
-		{
-			if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0))
-			{
-				if (map[k][p].isntOpened()) {
-					unknown = true;
-				}
-				else known = true;
-			}
-		}
-	}
+bool GameMap::isBordering(MapSize &y, MapSize &x) {
+  if (map[y][x].isntOpened())
+    return false;
+  bool known = false;
+  bool unknown = false;
+  for (short k = y - 1; k < y + 2; ++k) {
+    for (short p = x - 1; p < x + 2; ++p) {
+      if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0)) {
+        if (map[k][p].isntOpened()) {
+          unknown = true;
+        } else
+          known = true;
+      }
+    }
+  }
 
-	return unknown && known;
+  return unknown && known;
 };
 bool GameMap::giveHint() {
-	bool somethingHappened=false;
-	SmartArray<std::pair<short,short>> borderingPoints;
+  bool somethingHappened = false;
+  SmartArray<std::pair<short, short>> borderingPoints;
 
-	checkAllFlags();
-	for (short i{ 0 }; i < MatrixMapSizeY; ++i) {
-		for (short j{ 0 }; j < MatrixMapSizeX; ++j) {
-			if (isBordering(i, j)) 
-			{
-				borderingPoints.push_back(std::make_pair(i,j));
-			}
-		}
-	}
+  checkAllFlags();
+  for (short i{0}; i < MatrixMapSizeY; ++i) {
+    for (short j{0}; j < MatrixMapSizeX; ++j) {
+      if (isBordering(i, j)) {
+        borderingPoints.push_back(std::make_pair(i, j));
+      }
+    }
+  }
 
-	for (unsigned i{}; i < borderingPoints.getSize(); ++i) {
-		short y = borderingPoints[i].first;
-		short x = borderingPoints[i].second;
-		std::pair<unsigned, unsigned> unknownsAndFlaggedNear = calculateCountOfUnknownCellsNear(borderingPoints[i]);
-		if (map[y][x].getNum() == unknownsAndFlaggedNear.second)
-		{
-			if (stepOnAllAround(borderingPoints[i])) {
-				somethingHappened = true;
-				return true;
-			}
-		}
-		else if (map[y][x].getNum() == unknownsAndFlaggedNear.first)
-		{
-			unsigned char bombDelta = flagAllAround(borderingPoints[i]);
-			if (bombDelta>0)
-			{
-				bombAmount -= bombDelta;
-				somethingHappened = true;
-				return true;
-			}
-		}
-	}
-	return somethingHappened;
+  for (unsigned i{}; i < borderingPoints.getSize(); ++i) {
+    short y = borderingPoints[i].first;
+    short x = borderingPoints[i].second;
+    std::pair<unsigned, unsigned> unknownsAndFlaggedNear =
+        calculateCountOfUnknownCellsNear(borderingPoints[i]);
+    if (map[y][x].getNum() == unknownsAndFlaggedNear.second) {
+      if (stepOnAllAround(borderingPoints[i])) {
+        somethingHappened = true;
+        return true;
+      }
+    } else if (map[y][x].getNum() == unknownsAndFlaggedNear.first) {
+      unsigned char bombDelta = flagAllAround(borderingPoints[i]);
+      if (bombDelta > 0) {
+        bombAmount -= bombDelta;
+        somethingHappened = true;
+        return true;
+      }
+    }
+  }
+  return somethingHappened;
 }
 bool GameMap::giveSuperHint() {
-	bool somethingHappened = false;
-	SmartArray<std::pair<short, short>> borderingPoints;
-	checkAllFlags();
-	auto isBordering = [&](MapSize y, MapSize x)->bool
-	{
-		if (map[y][x].isntOpened())
-			return false;
-		bool known = false;
-		bool unknown = false;
-		for (short k = y - 1; k < y + 2; ++k)
-		{
-			for (short p = x - 1; p < x + 2; ++p)
-			{
-				if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0))
-				{
-					if (map[k][p].isntOpened()) {
-						unknown = true;
-					}
-					else known = true;
-				}
-			}
-		}
+  bool somethingHappened = false;
+  SmartArray<std::pair<short, short>> borderingPoints;
+  checkAllFlags();
+  auto isBordering = [&](MapSize y, MapSize x) -> bool {
+    if (map[y][x].isntOpened())
+      return false;
+    bool known = false;
+    bool unknown = false;
+    for (short k = y - 1; k < y + 2; ++k) {
+      for (short p = x - 1; p < x + 2; ++p) {
+        if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0)) {
+          if (map[k][p].isntOpened()) {
+            unknown = true;
+          } else
+            known = true;
+        }
+      }
+    }
 
-		return unknown && known;
-	};
-	for (short i{ 0 }; i < MatrixMapSizeY; ++i) {
-		for (short j{ 0 }; j < MatrixMapSizeX; ++j) {
-			if (isBordering(i, j))
-			{
-				borderingPoints.push_back(std::make_pair(i, j));
-			}
-		}
-	}
-	for (unsigned i{}; i < borderingPoints.getSize(); ++i) {
-		short y = borderingPoints[i].first;
-		short x = borderingPoints[i].second;
-		std::pair<unsigned, unsigned> unknownsAndFlaggedNear = calculateCountOfUnknownCellsNear(borderingPoints[i]);
-		if (map[y][x].getNum() == unknownsAndFlaggedNear.second)
-		{
-			if (stepOnAllAround(borderingPoints[i])) {
-				somethingHappened = true;	
-			}
+    return unknown && known;
+  };
+  for (short i{0}; i < MatrixMapSizeY; ++i) {
+    for (short j{0}; j < MatrixMapSizeX; ++j) {
+      if (isBordering(i, j)) {
+        borderingPoints.push_back(std::make_pair(i, j));
+      }
+    }
+  }
+  for (unsigned i{}; i < borderingPoints.getSize(); ++i) {
+    short y = borderingPoints[i].first;
+    short x = borderingPoints[i].second;
+    std::pair<unsigned, unsigned> unknownsAndFlaggedNear =
+        calculateCountOfUnknownCellsNear(borderingPoints[i]);
+    if (map[y][x].getNum() == unknownsAndFlaggedNear.second) {
+      if (stepOnAllAround(borderingPoints[i])) {
+        somethingHappened = true;
+      }
 
-		}
-		else if (map[y][x].getNum() == unknownsAndFlaggedNear.first)
-		{
-			unsigned char bombDelta = flagAllAround(borderingPoints[i]);
-			if (bombDelta > 0)
-			{
-				bombAmount -= bombDelta;
-				somethingHappened = true;
-			}
-		}
-	}
-	return somethingHappened;
+    } else if (map[y][x].getNum() == unknownsAndFlaggedNear.first) {
+      unsigned char bombDelta = flagAllAround(borderingPoints[i]);
+      if (bombDelta > 0) {
+        bombAmount -= bombDelta;
+        somethingHappened = true;
+      }
+    }
+  }
+  return somethingHappened;
 }
-std::pair<unsigned,unsigned> GameMap::calculateCountOfUnknownCellsNear(std::pair<short, short>& coordinates) {
-	unsigned unknown = 0;
-	unsigned flagged = 0;
-		for (short k = coordinates.first - 1; k < coordinates.first + 2; ++k)
-		{
-			for (short p = coordinates.second - 1; p < coordinates.second + 2; ++p)
-			{
-				if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0))
-				{
-					if (map[k][p].isntOpened()) {
-						unknown++;
-						if (map[k][p].isFlagged())
-							flagged++;
-					}
-				}
-			}
-		}
-	return std::make_pair(unknown, flagged);
+std::pair<unsigned, unsigned> GameMap::calculateCountOfUnknownCellsNear(
+    std::pair<short, short> &coordinates) {
+  unsigned unknown = 0;
+  unsigned flagged = 0;
+  for (short k = coordinates.first - 1; k < coordinates.first + 2; ++k) {
+    for (short p = coordinates.second - 1; p < coordinates.second + 2; ++p) {
+      if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0)) {
+        if (map[k][p].isntOpened()) {
+          unknown++;
+          if (map[k][p].isFlagged())
+            flagged++;
+        }
+      }
+    }
+  }
+  return std::make_pair(unknown, flagged);
 }
 
-unsigned char GameMap::flagAllAround(std::pair<short, short>& coordinates) {
-	unsigned char changed = 0;
-	for (short k = coordinates.first - 1; k < coordinates.first + 2; ++k)
-	{
-		for (short p = coordinates.second - 1; p < coordinates.second + 2; ++p)
-		{
-			if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0))
-			{
-				if (!map[k][p].isFlagged())
-				{
-					changed+=map[k][p].flag();
-					sureFlags.push_back(std::make_pair(k, p));
-				}
-			}
-		}
-	}
-	return changed;
+unsigned char GameMap::flagAllAround(std::pair<short, short> &coordinates) {
+  unsigned char changed = 0;
+  for (short k = coordinates.first - 1; k < coordinates.first + 2; ++k) {
+    for (short p = coordinates.second - 1; p < coordinates.second + 2; ++p) {
+      if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0)) {
+        if (!map[k][p].isFlagged()) {
+          changed += map[k][p].flag();
+          sureFlags.push_back(std::make_pair(k, p));
+        }
+      }
+    }
+  }
+  return changed;
 }
-bool GameMap::stepOnAllAround(std::pair<MapSize, MapSize>& coordinates) {
-	bool changed = false;
-	for (short k = coordinates.first - 1; k < coordinates.first + 2; ++k)
-	{
-		for (short p = coordinates.second - 1; p < coordinates.second + 2; ++p)
-		{
-			if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0))
-			{
-				if (!map[k][p].isFlagged() && map[k][p].isntOpened())
-				{
-					openCell(k, p);
-					changed = true;
-				}
-			}
-		}
-	}
-	return changed;
+bool GameMap::stepOnAllAround(std::pair<MapSize, MapSize> &coordinates) {
+  bool changed = false;
+  for (short k = coordinates.first - 1; k < coordinates.first + 2; ++k) {
+    for (short p = coordinates.second - 1; p < coordinates.second + 2; ++p) {
+      if ((p < MatrixMapSizeX && p >= 0) && (k < MatrixMapSizeY && k >= 0)) {
+        if (!map[k][p].isFlagged() && map[k][p].isntOpened()) {
+          openCell(k, p);
+          changed = true;
+        }
+      }
+    }
+  }
+  return changed;
 }
 GameMap::~GameMap() {
-	CellSizeX = 0;
-	CellSizeY = 0;
-	deltaY = 0;
-	deltaX = 0;
-	bombAmount_ = 0;
-	deleteUnique();
-	MatrixMapSizeX = 0;
-	MatrixMapSizeY = 0;
-
+  CellSizeX = 0;
+  CellSizeY = 0;
+  deltaY = 0;
+  deltaX = 0;
+  bombAmount_ = 0;
+  deleteUnique();
+  MatrixMapSizeX = 0;
+  MatrixMapSizeY = 0;
 }
