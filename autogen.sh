@@ -1,1 +1,1 @@
-g++ *.cpp  -o Minesweaper -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -O3
+g++ *.cpp  -o Minesweeper -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -O3
