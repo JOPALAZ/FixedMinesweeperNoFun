@@ -9,7 +9,7 @@
                 "-g",
                 "*.cpp",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}",
+                "${fileDirname}/../Mineswepper",
                 "-lsfml-graphics",
                 "-lsfml-window",
                 "-lsfml-system",
