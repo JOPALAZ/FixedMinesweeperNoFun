@@ -1,5 +1,6 @@
 
-#include "GameField.h"
+//#include "GameField.h"
+#include "SceneHandler.h"
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include <ctime>
@@ -10,7 +11,58 @@
 
 int main() {
 
-  GameField gameField;
+
+  
+  sf::RenderWindow window(sf::VideoMode(400, 400), "ARCADE AHAHA");
+  SceneHandler scene(&window);
+  scene.loadGame("dsa");
+  window.setVerticalSyncEnabled(true);
+  while (window.isOpen()) {
+    sf::Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == sf::Event::Closed)
+        window.close();
+      if (event.type == sf::Event::Resized) {
+        sf::View view;
+        view.reset(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y));
+        window.setView(view);
+        for (const auto &el : scene.getScene()->drawObjects) {
+          el->resize();
+        }
+      }
+      if (event.type == sf::Event::MouseButtonPressed) {
+        if (event.mouseButton.button == sf::Mouse::Button::Left &&
+            scene.getScene()) {
+          for (const auto &el : scene.getScene()->interactiveObjects) {
+            if (el && el->mouseInBounds()) {
+              el->processMouse();
+            }
+            if (!scene.getScene()) {
+              break;
+            }
+          }
+        }
+      }
+      if (event.type == sf::Event::KeyPressed && scene.getScene()) {
+        for (const auto &el : scene.getScene()->interactiveObjects) {
+          if (el->takesInput()) {
+            el->processInput();
+          }
+        }
+      }
+    }
+
+    window.clear();
+    if (scene.getScene()) {
+      for (const auto &el : scene.getScene()->drawObjects) {
+        el->draw();
+      }
+    }
+    window.display();
+  }
+
+  return 0;
+  /*GameField gameField;
   if (!gameField.isOk()) {
     std::cout << "NOT ALL FILES WERE LOADED\n";
     return -1;
@@ -56,4 +108,5 @@ int main() {
   }
 
   return 0;
+  */
 }
